@@ -2,27 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>9</version>
-    </parent>
-    
+    <modelVersion>4.0.0</modelVersion> 
     <groupId>jp.hisano</groupId>
     <artifactId>netty-codec-webtransport</artifactId>
     <version>1.0-SNAPSHOT</version>
-
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <netty.version>4.1.111.Final</netty.version>
+        <netty.version>4.1.128.Final</netty.version>
         <netty.build.version>31</netty.build.version>
-        <netty.quic.version>0.0.65.Final</netty.quic.version>
+        <netty.quic.version>0.0.74.Final</netty.quic.version>
         <netty.quic.classifier>${os.detected.name}-${os.detected.arch}</netty.quic.classifier>
-
         <junit.version>5.9.0</junit.version>
     </properties>
 
@@ -112,8 +103,14 @@
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
+            <artifactId>bctls-jdk18on</artifactId>
+            <version>1.80</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk18on</artifactId>
-            <version>1.78</version>
+            <version>1.80</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -159,7 +156,6 @@
             <version>3.18.0</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>com.microsoft.playwright</groupId>
             <artifactId>playwright</artifactId>

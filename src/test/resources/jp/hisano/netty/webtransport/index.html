@@ -39,6 +39,8 @@
                     const reader = transport.datagrams.readable.getReader();
                     console.log('Reader created.');
 
+                    // Note: Datagrams are unreliable (like UDP) - some may not arrive
+                    // The test framework has retry logic to handle this
                     await writer.write(new TextEncoder().encode('abc'));
                     console.log('Data sent: abc');
 

@@ -8,7 +8,7 @@
 
 ## 仕様
 
-- [WebTransport over HTTP/3](https://www.ietf.org/archive/id/draft-ietf-webtrans-http3-09.html)
+- [WebTransport over HTTP/3](https://datatracker.ietf.org/doc/draft-ietf-webtrans-http3/) (draft-14を実装)
 - [The WebTransport Protocol Framework](https://www.ietf.org/archive/id/draft-ietf-webtrans-overview-07.html)
 
 - [MDNのWebTransport API](https://developer.mozilla.org/en-US/docs/Web/API/WebTransport_API)

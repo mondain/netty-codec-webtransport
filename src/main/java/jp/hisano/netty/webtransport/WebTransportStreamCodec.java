@@ -28,12 +28,33 @@ public class WebTransportStreamCodec extends Http3RequestStreamInboundHandler {
 			return;
 		}
 
+		// Create session synchronously BEFORE sending response to avoid race condition
+		// where bidirectional stream frames arrive before session exists
+		QuicStreamChannel streamChannel = (QuicStreamChannel) ctx.channel();
+		WebTransportSession session;
+		try {
+			session = new WebTransportSession(streamChannel);
+			System.out.println("[WebTransportStreamCodec] Session created: id = " + session.sessionId());
+		} catch (Exception e) {
+			System.err.println("[WebTransportStreamCodec] Failed to create session: " + e.getMessage());
+			e.printStackTrace();
+			Http3HeadersFrame errorFrame = new DefaultHttp3HeadersFrame();
+			errorFrame.headers().status("500");
+			ctx.writeAndFlush(errorFrame).addListener(QuicStreamChannel.SHUTDOWN_OUTPUT);
+			return;
+		}
+
 		Http3HeadersFrame responseFrame = new DefaultHttp3HeadersFrame();
 		responseFrame.headers().status("200");
-		responseFrame.headers().secWebtransportHttp3Draft("draft02");
+		responseFrame.headers().secWebtransportHttp3Draft("draft14");
 		ctx.writeAndFlush(responseFrame).addListener(future -> {
-			if (future.isSuccess()) {
-				new WebTransportSession((QuicStreamChannel) ctx.channel());
+			if (!future.isSuccess()) {
+				// If write fails, clean up the session we created
+				System.err.println("[WebTransportStreamCodec] Failed to send response, closing session: " + future.cause().getMessage());
+				future.cause().printStackTrace();
+				session.close();
+			} else {
+				System.out.println("[WebTransportStreamCodec] Response sent successfully for session: " + session.sessionId());
 			}
 		});
 	}

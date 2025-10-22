@@ -347,8 +347,23 @@ final class Http3FrameCodec extends ByteToMessageDecoder implements ChannelOutbo
                 return payLoadLength;
             case WEBTRANSPORT_BIDIRECTIONAL_FRAME_TYPE:
                 long sessionId = payLoadLength;
-                this.webTransportStream = WebTransportSession.createAndAddStream(sessionId, ((QuicStreamChannel) ctx.channel()));
-                out.add(new WebTransportStreamOpenFrame(this.webTransportStream));
+                try {
+                    this.webTransportStream = WebTransportSession.createAndAddStream(sessionId, ((QuicStreamChannel) ctx.channel()));
+                    out.add(new WebTransportStreamOpenFrame(this.webTransportStream));
+                } catch (IllegalStateException e) {
+                    // Session doesn't exist yet or session ID mismatch
+                    // This should not happen with synchronous session creation, but handle it defensively
+                    System.err.println("[Http3FrameCodec] Failed to create stream for session " + sessionId + ": " + e.getMessage());
+                    connectionError(ctx, Http3ErrorCode.H3_INTERNAL_ERROR,
+                        "WebTransport session not ready or session ID mismatch", true);
+                    return 0;
+                } catch (Exception e) {
+                    System.err.println("[Http3FrameCodec] Unexpected error creating WebTransport stream: " + e.getMessage());
+                    e.printStackTrace();
+                    connectionError(ctx, Http3ErrorCode.H3_INTERNAL_ERROR,
+                        "Failed to create WebTransport stream", true);
+                    return 0;
+                }
                 return payLoadLength;
             default:
                 if (!Http3CodecUtils.isReservedFrameType(longType)) {

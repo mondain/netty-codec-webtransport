@@ -118,7 +118,21 @@ abstract class Http3UnidirectionalStreamInboundHandler extends ByteToMessageDeco
                 }
                 long sessionId = Http3CodecUtils.readVariableLengthInteger(in, sessionIdLen);
 
-                WebTransportStream stream = WebTransportSession.createAndAddStream(sessionId, ((QuicStreamChannel) ctx.channel()));
+                WebTransportStream stream;
+                try {
+                    stream = WebTransportSession.createAndAddStream(sessionId, ((QuicStreamChannel) ctx.channel()));
+                } catch (IllegalStateException e) {
+                    // Session doesn't exist yet or session ID mismatch
+                    // This should not happen with synchronous session creation, but handle it defensively
+                    System.err.println("[Http3UnidirectionalStreamInboundHandler] Failed to create stream for session " + sessionId + ": " + e.getMessage());
+                    ctx.close();
+                    return;
+                } catch (Exception e) {
+                    System.err.println("[Http3UnidirectionalStreamInboundHandler] Unexpected error creating WebTransport stream: " + e.getMessage());
+                    e.printStackTrace();
+                    ctx.close();
+                    return;
+                }
 
                 ctx.pipeline().replace(this, null, new SimpleChannelInboundHandler<ByteBuf>() {
                     @Override
